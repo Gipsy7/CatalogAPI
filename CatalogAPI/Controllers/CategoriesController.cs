@@ -26,36 +26,57 @@ namespace CatalogAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
-            var categories = await _context.Categories.AsNoTracking().Take(10).ToListAsync();
-            if (categories == null) return NotFound();
-            return Ok(categories);
+            try
+            {
+                var categories = await _context.Categories.AsNoTracking().Take(10).ToListAsync();
+                if (categories == null) return NotFound("Categoria não encontrada...");
+                return Ok(categories);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+            
         }
 
         [HttpGet("products")]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesWithProducts()
         {
-            var categories = await _context.Categories.Include(p => p.Products).Where(c => c.Id <= 10).AsNoTracking().ToListAsync();
-            if (categories == null) return NotFound();
-            return Ok(categories);
+            try
+            {
+                var categories = await _context.Categories.Include(p => p.Products).Where(c => c.Id <= 10).AsNoTracking().ToListAsync();
+                if (categories == null) return NotFound("Categoria não encontrada...");
+                return Ok(categories);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+           
         }
 
-        // GET: api/Categories/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Category>> GetCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            try
+            {
+                var category = await _context.Categories.FindAsync(id);
 
-            if (category == null) return NotFound();
+                if (category == null) return NotFound("Categoria não encontrada...");
 
-            return category;
+                return category;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+            
         }
 
-        // PUT: api/Categories/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategory(int id, Category category)
         {
-            if (id != category.Id) return BadRequest();
+            if (id != category.Id) return BadRequest("Dados inválidos");
 
             _context.Entry(category).State = EntityState.Modified;
 
@@ -67,7 +88,7 @@ namespace CatalogAPI.Controllers
             {
                 if (!CategoryExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Categoria não encontrada...");
                 }
                 else
                 {
@@ -78,29 +99,42 @@ namespace CatalogAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/Categories
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Category>> PostCategory(Category category)
         {
-            if (category == null) return BadRequest();
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (category == null) return BadRequest("Dados inválidos");
+                _context.Categories.Add(category);
+                await _context.SaveChangesAsync();
 
-            return new CreatedAtRouteResult("GetCategory", new { id = category.Id }, category);
+                return new CreatedAtRouteResult("GetCategory", new { id = category.Id }, category);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+            
         }
 
-        // DELETE: api/Categories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null) return NotFound();
+            try
+            {
+                var category = await _context.Categories.FindAsync(id);
+                if (category == null) return NotFound("Categoria não encontrada...");
 
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+           
         }
 
         private bool CategoryExists(int id)

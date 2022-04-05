@@ -19,50 +19,89 @@ namespace CatalogAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            var products = await _context.Products.AsNoTracking().Take(20).ToListAsync();
-            if(products == null) return NotFound();
-            return Ok(products);
+            try
+            {
+                var products = await _context.Products.AsNoTracking().Take(20).ToListAsync();
+                if (products == null) return NotFound("Produto não encontrado...");
+                return Ok(products);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
         }
 
         [HttpGet("{id:int}", Name = "GetProduct")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if(product == null) return NotFound();
-            return Ok(product);
+            try
+            {
+                var product = await _context.Products.FindAsync(id);
+                if (product == null) return NotFound("Produto não encontrado...");
+                return Ok(product);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+            
         }
 
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
-            if (product == null) return BadRequest();
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (product == null) return BadRequest("Dados inválidos");
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
 
-            return new CreatedAtRouteResult("GetProduct", new { id = product.Id }, product);
+                return new CreatedAtRouteResult("GetProduct", new { id = product.Id }, product);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+           
         }
 
         [HttpPut("{id:int}")]
         public async Task<ActionResult<Product>> PutProduct(int id, Product product)
         {
-            if(id != product.Id) return BadRequest();
+            try
+            {
+                if (id != product.Id) return BadRequest("Dados inválidos");
 
-            _context.Entry(product).State = EntityState.Modified;
+                _context.Entry(product).State = EntityState.Modified;
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-            return Ok(product);
+                return Ok(product);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+            
         }
 
         [HttpDelete]
         public async Task<ActionResult> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) return NotFound();
+            try
+            {
+                var product = await _context.Products.FindAsync(id);
+                if (product == null) return NotFound("Produto não encontrado...");
 
-            _context.Remove(product);
-            await _context.SaveChangesAsync();
-            return Ok(product);
+                _context.Remove(product);
+                await _context.SaveChangesAsync();
+                return Ok(product);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
+            }
+            
         }
     }
 }
