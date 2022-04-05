@@ -26,15 +26,15 @@ namespace CatalogAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
-            var categories = await _context.Categories.AsNoTracking().ToListAsync();
-            if(categories == null) return NotFound();
+            var categories = await _context.Categories.AsNoTracking().Take(10).ToListAsync();
+            if (categories == null) return NotFound();
             return Ok(categories);
         }
 
         [HttpGet("products")]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesWithProducts()
         {
-            var categories = await _context.Categories.Include(p => p.Products).ToListAsync();
+            var categories = await _context.Categories.Include(p => p.Products).Where(c => c.Id <= 10).AsNoTracking().ToListAsync();
             if (categories == null) return NotFound();
             return Ok(categories);
         }
@@ -45,10 +45,7 @@ namespace CatalogAPI.Controllers
         {
             var category = await _context.Categories.FindAsync(id);
 
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
 
             return category;
         }
@@ -58,10 +55,7 @@ namespace CatalogAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategory(int id, Category category)
         {
-            if (id != category.Id)
-            {
-                return BadRequest();
-            }
+            if (id != category.Id) return BadRequest();
 
             _context.Entry(category).State = EntityState.Modified;
 
@@ -89,7 +83,7 @@ namespace CatalogAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Category>> PostCategory(Category category)
         {
-            if(category == null)return BadRequest();
+            if (category == null) return BadRequest();
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
@@ -101,10 +95,7 @@ namespace CatalogAPI.Controllers
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
 
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();

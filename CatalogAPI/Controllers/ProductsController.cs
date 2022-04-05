@@ -19,7 +19,7 @@ namespace CatalogAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            var products = await _context.Products.ToListAsync();
+            var products = await _context.Products.AsNoTracking().Take(20).ToListAsync();
             if(products == null) return NotFound();
             return Ok(products);
         }
